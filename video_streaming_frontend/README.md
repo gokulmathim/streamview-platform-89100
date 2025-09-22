@@ -1,82 +1,72 @@
-# Lightweight React Template for KAVIA
+# StreamView Frontend (React)
 
-This project provides a minimal React template with a clean, modern UI and minimal dependencies.
+Modern, minimalist video streaming frontend following the “Ocean Professional” theme.
 
 ## Features
+- Browse videos via grid thumbnails
+- Sidebar navigation for categories and user
+- Top search bar to filter videos
+- Video player modal to stream/play selected videos
+- User profile section with mock authentication
+- Clean service layer with REST API placeholders
 
-- **Lightweight**: No heavy UI frameworks - uses only vanilla CSS and React
-- **Modern UI**: Clean, responsive design with KAVIA brand styling
-- **Fast**: Minimal dependencies for quick loading times
-- **Simple**: Easy to understand and modify
+## Tech
+- React 18 + react-scripts
+- No heavy UI library; handcrafted CSS based on Ocean Professional theme
+
+## Theme (Ocean Professional)
+- primary: `#2563EB` (blue)
+- secondary: `#F59E0B` (amber)
+- error: `#EF4444`
+- background: `#f9fafb`
+- surface: `#ffffff`
+- text: `#111827`
 
 ## Getting Started
 
-In the project directory, you can run:
+1. Install:
+   npm install
 
-### `npm start`
+2. Run:
+   npm start
 
-Runs the app in development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+3. Test:
+   npm test
 
-### `npm test`
+The app will be available at http://localhost:3000
 
-Launches the test runner in interactive watch mode.
+## Environment Variables
+Create `.env` at project root (optional):
+- REACT_APP_API_BASE_URL: Base URL of backend API (defaults to http://localhost:4000)
 
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-## Customization
-
-### Colors
-
-The main brand colors are defined as CSS variables in `src/App.css`:
-
-```css
-:root {
-  --kavia-orange: #E87A41;
-  --kavia-dark: #1A1A1A;
-  --text-color: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.7);
-  --border-color: rgba(255, 255, 255, 0.1);
-}
+Example `.env.example`:
+```
+REACT_APP_API_BASE_URL=http://localhost:4000
 ```
 
-### Components
+## Integrating Backend
+Replace functions in `src/services/api.js` with real `fetch`/`axios` calls:
+- VideoAPI.getVideos({ query, category })
+- VideoAPI.getVideoById(id)
+- AuthAPI.login({ email, password })
+- AuthAPI.me({ token })
+- PlaybackAPI.getPlaybackUrl(videoId)
 
-This template uses pure HTML/CSS components instead of a UI framework. You can find component styles in `src/App.css`. 
+Keep return shapes the same to avoid refactors.
 
-Common components include:
-- Buttons (`.btn`, `.btn-large`)
-- Container (`.container`)
-- Navigation (`.navbar`)
-- Typography (`.title`, `.subtitle`, `.description`)
+## Project Structure
+- src/theme.js                    Theme tokens and root CSS variables
+- src/services/api.js             REST API placeholders
+- src/components/*                UI Components
+  - Sidebar.js                    Sidebar navigation with profile
+  - TopBar.js                     Top search bar
+  - VideoGrid.js                  Grid of videos
+  - VideoCard.js                  Individual video card
+  - VideoPlayerModal.js           Modal with HTML5 video player
+  - styles.css                    Component styles (Ocean Professional)
+- src/App.js                      Page layout and integrations
+- src/index.css                   Base styles and typography
 
-## Learn More
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## Notes
+- Video sources use a public sample URL. Replace via PlaybackAPI when backend is ready.
+- Accessibility: semantic roles on topbar and modal. Keyboard navigation supported by default buttons/inputs.

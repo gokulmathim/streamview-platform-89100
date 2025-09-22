@@ -1,49 +1,110 @@
-import React, { useState, useEffect } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useMemo, useState } from 'react';
+import './index.css';
+import './components/styles.css';
+import TopBar from './components/TopBar';
+import Sidebar from './components/Sidebar';
+import VideoGrid from './components/VideoGrid';
+import VideoPlayerModal from './components/VideoPlayerModal';
+import { AuthAPI, VideoAPI } from './services/api';
+import { applyThemeToRoot, theme } from './theme';
 
 // PUBLIC_INTERFACE
-function App() {
-  const [theme, setTheme] = useState('light');
+export default function App() {
+  const [query, setQuery] = useState('');
+  const [category, setCategory] = useState('All');
+  const [videos, setVideos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activeVideo, setActiveVideo] = useState(null);
+  const [playerOpen, setPlayerOpen] = useState(false);
 
-  // Effect to apply theme to document element
+  const [user, setUser] = useState(null);
+  const [authToken, setAuthToken] = useState('');
+
+  const categories = useMemo(() => {
+    const set = new Set(videos.map(v => v.category));
+    return Array.from(set);
+  }, [videos]);
+
+  // Initialize theme
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
+    applyThemeToRoot();
+    document.title = `StreamView · ${theme.name}`;
+  }, []);
+
+  // Load videos with filters
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      setLoading(true);
+      try {
+        const { items } = await VideoAPI.getVideos({ query, category });
+        if (mounted) setVideos(items);
+      } catch (e) {
+        if (mounted) setVideos([]);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+    return () => { mounted = false; };
+  }, [query, category]);
 
   // PUBLIC_INTERFACE
-  const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
+  const handleSelectVideo = (v) => {
+    setActiveVideo(v);
+    setPlayerOpen(true);
+  };
+
+  // PUBLIC_INTERFACE
+  const handleLogin = async () => {
+    try {
+      const res = await AuthAPI.login({ email: 'ocean.pro@example.com', password: 'password' });
+      setAuthToken(res.token);
+      setUser(res.user);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(e);
+      alert('Login failed (mock).');
+    }
+  };
+
+  // PUBLIC_INTERFACE
+  const handleLogout = async () => {
+    await AuthAPI.logout();
+    setAuthToken('');
+    setUser(null);
   };
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <button 
-          className="theme-toggle" 
-          onClick={toggleTheme}
-          aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-        >
-          {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
-        </button>
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <p>
-          Current theme: <strong>{theme}</strong>
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="sv-container">
+      <div className="sv-layout">
+        <Sidebar
+          categories={categories}
+          activeCategory={category}
+          onSelectCategory={setCategory}
+          user={user}
+          onLoginClick={handleLogin}
+          onLogoutClick={handleLogout}
+        />
+        <main>
+          <TopBar query={query} onQueryChange={setQuery} />
+          <section className="sv-content">
+            {loading ? (
+              <div className="sv-grid-empty">
+                <div className="sv-empty-title">Loading videos…</div>
+                <div className="sv-empty-sub">Fetching Ocean Professional content.</div>
+              </div>
+            ) : (
+              <VideoGrid videos={videos} onSelect={handleSelectVideo} />
+            )}
+          </section>
+        </main>
+      </div>
+
+      <VideoPlayerModal
+        open={playerOpen}
+        video={activeVideo}
+        onClose={() => setPlayerOpen(false)}
+      />
     </div>
   );
 }
-
-export default App;
