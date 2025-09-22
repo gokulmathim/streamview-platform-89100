@@ -238,6 +238,65 @@ body {
   box-shadow: var(--shadow-md);
 }
 
+/* Plan pill */
+.sv-plan-pill {
+  display: inline-block;
+  align-self: flex-start;
+  padding: 6px 10px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 700;
+  background: #eef4ff;
+  color: #1d4ed8;
+  border: 1px solid #c7d2fe;
+}
+
+/* Premium lock overlay */
+.sv-lock-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(17,24,39,0.2), rgba(17,24,39,0.6));
+  color: #fff;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 8px;
+  pointer-events: none;
+  border-radius: 12px;
+}
+.sv-lock-badge {
+  background: rgba(37,99,235,0.95);
+  padding: 4px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: var(--shadow-sm);
+}
+.sv-lock-icon {
+  background: rgba(255,255,255,0.15);
+  padding: 6px 8px;
+  border-radius: 10px;
+}
+
+/* Ad placeholder */
+.sv-ad {
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px dashed var(--ocn-border);
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(245,158,11,0.12), rgba(255,255,255,0.9));
+  color: #92400e;
+  display: grid;
+  gap: 6px;
+}
+.sv-ad-title {
+  font-weight: 700;
+}
+.sv-ad-sub {
+  font-size: 12px;
+  color: #b45309;
+}
+
 .sv-thumb-wrap {
   position: relative;
   background: #eef2ff;

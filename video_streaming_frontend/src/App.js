@@ -8,6 +8,7 @@ import VideoPlayerModal from './components/VideoPlayerModal';
 import { AuthAPI, VideoAPI } from './services/api';
 import { applyThemeToRoot, theme } from './theme';
 import Dashboard from './pages/Dashboard';
+import { useUser } from './context/UserContext';
 
 // PUBLIC_INTERFACE
 export default function App() {
@@ -18,8 +19,8 @@ export default function App() {
   const [activeVideo, setActiveVideo] = useState(null);
   const [playerOpen, setPlayerOpen] = useState(false);
 
-  const [user, setUser] = useState(null);
-  const [authToken, setAuthToken] = useState('');
+  // Consume global user/plan from context
+  const { user, login, logout, upgradeToPremium, plan, isPremium } = useUser();
 
   // Simple route-like state: 'home' | 'dashboard'
   const [view, setView] = useState('home');
@@ -35,14 +36,19 @@ export default function App() {
     document.title = `StreamView · ${theme.name}`;
   }, []);
 
-  // Load videos with filters
+  // Load videos with filters (and attach premium/free flags)
   useEffect(() => {
     let mounted = true;
     (async () => {
       setLoading(true);
       try {
         const { items } = await VideoAPI.getVideos({ query, category });
-        if (mounted) setVideos(items);
+        // Simulate premium content: alternate items as premium
+        const withPlan = items.map((v, idx) => ({
+          ...v,
+          isPremium: idx % 3 === 0, // about a third of content marked premium
+        }));
+        if (mounted) setVideos(withPlan);
       } catch (e) {
         if (mounted) setVideos([]);
       } finally {
@@ -71,10 +77,8 @@ export default function App() {
   // PUBLIC_INTERFACE
   const handleLogin = async () => {
     try {
-      const res = await AuthAPI.login({ email: 'ocean.pro@example.com', password: 'password' });
-      setAuthToken(res.token);
-      setUser(res.user);
-      setView('dashboard');
+      const res = await login(async () => AuthAPI.login({ email: 'ocean.pro@example.com', password: 'password' }));
+      if (res?.user) setView('dashboard');
     } catch (e) {
       // eslint-disable-next-line no-console
       console.error(e);
@@ -84,9 +88,7 @@ export default function App() {
 
   // PUBLIC_INTERFACE
   const handleLogout = async () => {
-    await AuthAPI.logout();
-    setAuthToken('');
-    setUser(null);
+    await logout();
   };
 
   return (
@@ -97,8 +99,11 @@ export default function App() {
           activeCategory={category}
           onSelectCategory={(cat) => { setCategory(cat); setView('home'); }}
           user={user}
+          plan={plan}
+          isPremium={isPremium}
           onLoginClick={handleLogin}
           onLogoutClick={handleLogout}
+          onUpgradeClick={upgradeToPremium}
           onOpenDashboard={openDashboard}
         />
         <main>

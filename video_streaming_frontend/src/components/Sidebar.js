@@ -2,12 +2,23 @@ import React from 'react';
 import './styles.css';
 
 // PUBLIC_INTERFACE
-export default function Sidebar({ categories = [], activeCategory = 'All', onSelectCategory, user, onLoginClick, onLogoutClick, onOpenDashboard }) {
+export default function Sidebar({
+  categories = [],
+  activeCategory = 'All',
+  onSelectCategory,
+  user,
+  plan = 'free',
+  isPremium = false,
+  onLoginClick,
+  onLogoutClick,
+  onUpgradeClick,
+  onOpenDashboard
+}) {
   /** Sidebar includes:
    * - Brand
    * - Navigation with Dashboard
    * - Categories
-   * - Profile/Login
+   * - Profile/Login + Subscription Status & Upgrade CTA
    */
   return (
     <aside className="sv-sidebar">
@@ -59,6 +70,17 @@ export default function Sidebar({ categories = [], activeCategory = 'All', onSel
                 <div className="sv-user-email">{user.email}</div>
               </div>
             </div>
+
+            <div className="sv-plan-pill" aria-live="polite">
+              {isPremium ? 'Premium' : 'Free'}
+            </div>
+
+            {!isPremium ? (
+              <button className="sv-btn sv-btn-primary" onClick={onUpgradeClick} aria-label="Upgrade to Premium">
+                Upgrade to Premium
+              </button>
+            ) : null}
+
             <button className="sv-btn sv-btn-secondary" onClick={onLogoutClick}>Logout</button>
           </>
         ) : (
@@ -70,6 +92,7 @@ export default function Sidebar({ categories = [], activeCategory = 'All', onSel
                 <div className="sv-user-email">Sign in for more</div>
               </div>
             </div>
+            <div className="sv-plan-pill">Free</div>
             <button className="sv-btn sv-btn-primary" onClick={onLoginClick}>Login</button>
           </>
         )}

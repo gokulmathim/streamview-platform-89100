@@ -4,6 +4,7 @@ import { applyThemeToRoot } from '../theme';
 import { VideoAPI, UserAPI, RecommendationAPI } from '../services/api';
 import VideoGrid from '../components/VideoGrid';
 import TopBar from '../components/TopBar';
+import { useUser } from '../context/UserContext';
 
 // PUBLIC_INTERFACE
 export default function Dashboard({ user, onSelectVideo, onRequestSearch }) {
@@ -35,16 +36,18 @@ export default function Dashboard({ user, onSelectVideo, onRequestSearch }) {
           UserAPI.getPreferences(user?.id),
         ]);
         const vids = (await VideoAPI.getVideos({})).items;
+        // Attach premium flags deterministically
+        const withFlags = vids.map((v, idx) => ({ ...v, isPremium: idx % 4 === 0 }));
         const recoRes = await RecommendationAPI.getRecommended({
           user,
-          history: histRes || [],
+          history: (histRes || []).map((v, idx) => ({ ...v, isPremium: idx % 5 === 0 })),
           preferences: prefRes || [],
-          catalog: vids,
+          catalog: withFlags,
         });
         if (!mounted) return;
-        setHistory(histRes || []);
+        setHistory((histRes || []).map((v, idx) => ({ ...v, isPremium: idx % 5 === 0 })));
         setPreferences(prefRes || []);
-        setRecommended(recoRes || []);
+        setRecommended((recoRes || []).map((v, idx) => ({ ...v, isPremium: v.isPremium ?? idx % 4 === 0 })));
       } catch (e) {
         if (mounted) {
           setHistory([]);

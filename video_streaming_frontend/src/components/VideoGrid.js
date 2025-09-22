@@ -1,9 +1,12 @@
 import React from 'react';
 import VideoCard from './VideoCard';
 import './styles.css';
+import { useUser } from '../context/UserContext';
 
 // PUBLIC_INTERFACE
 export default function VideoGrid({ videos = [], onSelect }) {
+  const { isPremium } = useUser();
+
   if (!videos.length) {
     return (
       <div className="sv-grid-empty">
@@ -15,7 +18,7 @@ export default function VideoGrid({ videos = [], onSelect }) {
   return (
     <div className="sv-grid">
       {videos.map((v) => (
-        <VideoCard key={v.id} video={v} onClick={onSelect} />
+        <VideoCard key={v.id} video={v} onClick={onSelect} isPremiumUser={isPremium} />
       ))}
     </div>
   );

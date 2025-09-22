@@ -20,7 +20,9 @@ const mockVideos = Array.from({ length: 24 }).map((_, idx) => ({
   category: ['Featured', 'Education', 'Music', 'Documentary'][idx % 4],
   description:
     'A calming exploration of the sea with minimalist visuals and modern soundscapes. Experience the Ocean Professional aesthetic.',
-  videoUrl: `https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4`
+  videoUrl: `https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4`,
+  // Initial tier flag (can be overridden downstream)
+  isPremium: idx % 3 === 0
 }));
 
 // PUBLIC_INTERFACE

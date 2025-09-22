@@ -1,16 +1,29 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { PlaybackAPI } from '../services/api';
 import './styles.css';
+import { useUser } from '../context/UserContext';
+import AdPlaceholder from './AdPlaceholder';
 
-// PUBLIC_INTERFACE
+/**
+ * PUBLIC_INTERFACE
+ * VideoPlayerModal enforces premium locking and shows ads for free users watching free content.
+ * Integration seams:
+ * - Replace lock check with server-side entitlement check when backend is available.
+ * - Replace AdPlaceholder with real ad SDK integration.
+ * - Replace PlaybackAPI.getPlaybackUrl with signed/secure playback URL retrieval.
+ */
 export default function VideoPlayerModal({ open, video, onClose }) {
   const [playUrl, setPlayUrl] = useState('');
   const [err, setErr] = useState('');
+  const { isPremium } = useUser();
+
+  const locked = useMemo(() => !!(video?.isPremium && !isPremium), [video, isPremium]);
+  const shouldShowAds = useMemo(() => !isPremium && video && !video.isPremium, [isPremium, video]);
 
   useEffect(() => {
     let mounted = true;
     (async () => {
-      if (open && video?.id) {
+      if (open && video?.id && !locked) {
         try {
           setErr('');
           const { url } = await PlaybackAPI.getPlaybackUrl(video.id);
@@ -25,7 +38,7 @@ export default function VideoPlayerModal({ open, video, onClose }) {
     return () => {
       mounted = false;
     };
-  }, [open, video]);
+  }, [open, video, locked]);
 
   if (!open) return null;
 
@@ -37,10 +50,18 @@ export default function VideoPlayerModal({ open, video, onClose }) {
           <button className="sv-icon-btn" onClick={onClose} aria-label="Close player">✕</button>
         </div>
         <div className="sv-modal-content">
-          {err ? (
+          {locked ? (
+            <div className="sv-grid-empty">
+              <div className="sv-empty-title">Premium content</div>
+              <div className="sv-empty-sub">Upgrade to Premium to watch this video. Ocean-grade perks, no ads.</div>
+            </div>
+          ) : err ? (
             <div className="sv-error">{err}</div>
           ) : (
-            <video className="sv-video" controls autoPlay src={playUrl} />
+            <>
+              <video className="sv-video" controls autoPlay src={playUrl} />
+              {shouldShowAds ? <AdPlaceholder type="banner" /> : null}
+            </>
           )}
           <div className="sv-video-meta">
             <div className="sv-video-author">{video?.author}</div>
