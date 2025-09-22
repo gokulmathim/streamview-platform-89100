@@ -7,6 +7,7 @@ import VideoGrid from './components/VideoGrid';
 import VideoPlayerModal from './components/VideoPlayerModal';
 import { AuthAPI, VideoAPI } from './services/api';
 import { applyThemeToRoot, theme } from './theme';
+import Dashboard from './pages/Dashboard';
 
 // PUBLIC_INTERFACE
 export default function App() {
@@ -19,6 +20,9 @@ export default function App() {
 
   const [user, setUser] = useState(null);
   const [authToken, setAuthToken] = useState('');
+
+  // Simple route-like state: 'home' | 'dashboard'
+  const [view, setView] = useState('home');
 
   const categories = useMemo(() => {
     const set = new Set(videos.map(v => v.category));
@@ -55,11 +59,22 @@ export default function App() {
   };
 
   // PUBLIC_INTERFACE
+  const openDashboard = () => {
+    setView('dashboard');
+  };
+
+  // PUBLIC_INTERFACE
+  const goHome = () => {
+    setView('home');
+  };
+
+  // PUBLIC_INTERFACE
   const handleLogin = async () => {
     try {
       const res = await AuthAPI.login({ email: 'ocean.pro@example.com', password: 'password' });
       setAuthToken(res.token);
       setUser(res.user);
+      setView('dashboard');
     } catch (e) {
       // eslint-disable-next-line no-console
       console.error(e);
@@ -80,23 +95,32 @@ export default function App() {
         <Sidebar
           categories={categories}
           activeCategory={category}
-          onSelectCategory={setCategory}
+          onSelectCategory={(cat) => { setCategory(cat); setView('home'); }}
           user={user}
           onLoginClick={handleLogin}
           onLogoutClick={handleLogout}
+          onOpenDashboard={openDashboard}
         />
         <main>
-          <TopBar query={query} onQueryChange={setQuery} />
-          <section className="sv-content">
-            {loading ? (
-              <div className="sv-grid-empty">
-                <div className="sv-empty-title">Loading videos…</div>
-                <div className="sv-empty-sub">Fetching Ocean Professional content.</div>
-              </div>
-            ) : (
-              <VideoGrid videos={videos} onSelect={handleSelectVideo} />
-            )}
-          </section>
+          <TopBar query={query} onQueryChange={(q) => { setQuery(q); setView('home'); }} />
+          {view === 'dashboard' && user ? (
+            <Dashboard
+              user={user}
+              onSelectVideo={handleSelectVideo}
+              onRequestSearch={(q) => { setQuery(q); setView('home'); }}
+            />
+          ) : (
+            <section className="sv-content">
+              {loading ? (
+                <div className="sv-grid-empty">
+                  <div className="sv-empty-title">Loading videos…</div>
+                  <div className="sv-empty-sub">Fetching Ocean Professional content.</div>
+                </div>
+              ) : (
+                <VideoGrid videos={videos} onSelect={handleSelectVideo} />
+              )}
+            </section>
+          )}
         </main>
       </div>
 

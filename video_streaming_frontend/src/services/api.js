@@ -1,4 +1,5 @@
 //
+//
 // REST API placeholders with clear separation for future backend integration.
 // All functions return mocked data and structure suitable to be replaced by real fetch/axios calls.
 //
@@ -9,7 +10,7 @@ const BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:4000';
 const delay = (ms = 300) => new Promise((res) => setTimeout(res, ms));
 
 // Mock dataset
-const mockVideos = Array.from({ length: 18 }).map((_, idx) => ({
+const mockVideos = Array.from({ length: 24 }).map((_, idx) => ({
   id: `vid_${idx + 1}`,
   title: `Oceanic Journey ${idx + 1}`,
   thumbnailUrl: `https://picsum.photos/seed/ocean-${idx + 1}/480/270`,
@@ -102,5 +103,52 @@ export const PlaybackAPI = {
     await delay(200);
     const v = await VideoAPI.getVideoById(videoId);
     return { url: v.videoUrl };
+  }
+};
+
+// PUBLIC_INTERFACE
+export const UserAPI = {
+  /**
+   * Simulated user watch history. Replace with:
+   * GET `${BASE_URL}/users/{userId}/history`
+   */
+  async getWatchHistory(userId) {
+    await delay(300);
+    const { items } = await VideoAPI.getVideos({});
+    const sample = items.slice(0, 6);
+    return sample.map((v, idx) => ({ ...v, watchedAt: Date.now() - idx * 60 * 60 * 1000 }));
+  },
+  /**
+   * Simulated user preferences. Replace with:
+   * GET `${BASE_URL}/users/{userId}/preferences`
+   */
+  async getPreferences(userId) {
+    await delay(200);
+    return ['Featured', 'Documentary', 'Education'];
+  }
+};
+
+// PUBLIC_INTERFACE
+export const RecommendationAPI = {
+  /**
+   * Simulated AI-driven recommendations combining:
+   * - Topic affinity (overlap with preferences)
+   * - Freshness (randomness)
+   * - Popularity (views)
+   * Replace with backend ML/rec system in the future.
+   */
+  async getRecommended({ user, history = [], preferences = [], catalog = [] }) {
+    await delay(400);
+    const prefSet = new Set(preferences);
+    const historyIds = new Set(history.map((h) => h.id));
+    const scored = (catalog || []).map((v) => {
+      const prefScore = prefSet.has(v.category) ? 2 : 0;
+      const popScore = Math.log10((v.views || 1) + 10);
+      const randScore = Math.random();
+      const penalty = historyIds.has(v.id) ? -2 : 0;
+      return { v, score: prefScore + popScore * 0.6 + randScore * 0.4 + penalty };
+    });
+    scored.sort((a, b) => b.score - a.score);
+    return scored.slice(0, 8).map((s) => s.v);
   }
 };

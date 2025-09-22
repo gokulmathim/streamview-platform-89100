@@ -2,7 +2,13 @@ import React from 'react';
 import './styles.css';
 
 // PUBLIC_INTERFACE
-export default function Sidebar({ categories = [], activeCategory = 'All', onSelectCategory, user, onLoginClick, onLogoutClick }) {
+export default function Sidebar({ categories = [], activeCategory = 'All', onSelectCategory, user, onLoginClick, onLogoutClick, onOpenDashboard }) {
+  /** Sidebar includes:
+   * - Brand
+   * - Navigation with Dashboard
+   * - Categories
+   * - Profile/Login
+   */
   return (
     <aside className="sv-sidebar">
       <div className="sv-brand">
@@ -14,6 +20,19 @@ export default function Sidebar({ categories = [], activeCategory = 'All', onSel
       </div>
 
       <nav className="sv-nav">
+        <div className="sv-nav-section-title">Navigation</div>
+        <ul className="sv-nav-list">
+          <li>
+            <button
+              className="sv-nav-item"
+              onClick={() => onOpenDashboard?.()}
+              aria-label="Open Dashboard"
+            >
+              Dashboard
+            </button>
+          </li>
+        </ul>
+
         <div className="sv-nav-section-title">Categories</div>
         <ul className="sv-nav-list">
           {['All', ...categories].map((cat) => (
