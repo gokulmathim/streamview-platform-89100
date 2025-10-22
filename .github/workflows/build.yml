@@ -2,7 +2,7 @@ name: Build
 on:
   push:
     branches:
-      - kavia-main
+      -cga-cgbe89bcb8 
   pull_request:
     types: [opened, synchronize, reopened]
 jobs:
